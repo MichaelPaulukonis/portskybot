@@ -1,0 +1,26 @@
+{
+  "name": "portskybot",
+  "version": "1.0.0",
+  "description": "The sky over the port was the color of a twitter-bot, tuned to pos-tagged template.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichaelPaulukonis/portskybot.git"
+  },
+  "keywords": [],
+  "author": "Michael Paulukonis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MichaelPaulukonis/portskybot/issues"
+  },
+  "homepage": "https://github.com/MichaelPaulukonis/portskybot",
+  "engines": {
+    "node": "4.1.2"
+  },
+  "dependencies": {
+    "tagspewer": "0.2.0"
+  }
+}
