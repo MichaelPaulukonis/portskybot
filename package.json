@@ -21,6 +21,9 @@
     "node": "4.1.2"
   },
   "dependencies": {
-    "tagspewer": "0.2.0"
+    "tagspewer": "0.3.1",
+    "twit": "~1.1.9",
+    "underscore": "1.8.3",
+    "underscore.deferred": "0.4.0"
   }
 }

@@ -1,22 +1,67 @@
-'use strict';
+// ### Libraries and globals
+var config = require('./config.js');
+var Twit = require('twit');
+var T = new Twit(config);
+var sequencer = new (require('./sequencer.js'))(config);
+var _ = require('underscore');
+_.mixin(require('underscore.deferred'));
 
-var Tagspewer = require('tagspewer'),
-    lexicon = require('./neuromancer.json'),
-    spewer = new Tagspewer(lexicon),
-    cleaner = require('./node_modules/tagspewer/lib/cleaner');
+// ### Utility Functions
+var logger = function(msg) {
+  if (config.log) console.log(msg);
+};
 
-var template = 'DT NN IN DT NN VBD DT NN IN NN , VBN TO DT JJ NN .';
+var tweeter = function() {
 
-var outs = [],
-    maxtime = 0;
+  _.when(
+    sequencer.next()
+  ) .then(function() {
 
-for (var i = 0; i < 10; i++) {
-  var port = spewer.spew(template, undefined, false).replace(/`/g, '');
-  outs.push(port);
-}
+    var sentence =_.flatten(arguments);
+    if (sentence[0]) sentence = sentence[0];
 
-var text = cleaner(outs.join('/n'));//.replace(/`/g, '');
+    logger(sentence);
 
-console.log(text);
+    if (sentence.length === 0 || sentence.length > 140) {
+      tweeter();
+    } else {
+      if (config.tweet_on) {
+        T.post('statuses/update', { status: sentence }, function(err, reply) {
+	  if (err) {
+	    console.log('error:', err);
+	  }
+	  else {
+            // nothing on success unless we wanna get crazy with logging replies
+	  }
+        });
+      }
+    }
 
-// require('fs').writeFileSync('port.sample.txt', text, 'utf8');
+  });
+
+};
+
+_.when(
+  sequencer.initDB()
+).then(function(status) {
+  if (status.toLowerCase().indexOf('error') > -1) {
+    console.log(status);
+    process.exit();
+  }
+
+  // only start up if no init errors
+
+  // Tweets ever n minutes
+  // set config.seconds to 60 for a complete minute
+  setInterval(function () {
+    try {
+      tweeter();
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }, 1000 * config.minutes * config.seconds);
+
+  // Tweets once on initialization.
+  tweeter();
+});
