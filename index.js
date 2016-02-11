@@ -1,67 +1,53 @@
-// ### Libraries and globals
-var config = require('./config.js');
-var Twit = require('twit');
-var T = new Twit(config);
-var sequencer = new (require('./sequencer.js'))(config);
-var _ = require('underscore');
-_.mixin(require('underscore.deferred'));
 
-// ### Utility Functions
-var logger = function(msg) {
-  if (config.log) console.log(msg);
-};
+var tweetbot = function() {
 
-var tweeter = function() {
+    // ### Libraries
+    var config = require('./config.js'),
+        Twit = require('twit'),
+        T = new Twit(config),
+        sequencer = new (require('./sequencer.js'))(config),
+        _ = require('underscore');
 
-  _.when(
-    sequencer.next()
-  ) .then(function() {
+    _.mixin(require('underscore.deferred'));
 
-    var sentence =_.flatten(arguments);
-    if (sentence[0]) sentence = sentence[0];
 
-    logger(sentence);
+    // ### Utility Functions
+    this.logger = function(msg) {
+        if (config.log) console.log(msg);
+    };
 
-    if (sentence.length === 0 || sentence.length > 140) {
-      tweeter();
-    } else {
-      if (config.tweet_on) {
-        T.post('statuses/update', { status: sentence }, function(err, reply) {
-	  if (err) {
-	    console.log('error:', err);
-	  }
-	  else {
-            // nothing on success unless we wanna get crazy with logging replies
-	  }
+    this.tweeter = function() {
+
+        var that = this;
+
+        _.when(
+            sequencer.next()
+        ) .then(function() {
+
+            var sentence =_.flatten(arguments);
+            if (sentence[0]) sentence = sentence[0];
+
+            that.logger(sentence);
+
+            if (sentence.length === 0 || sentence.length > 140) {
+                that.tweeter();
+            } else {
+                if (config.tweet_on) {
+                    T.post('statuses/update', { status: sentence }, function(err, reply) {
+	                if (err) {
+	                    console.log('error:', err);
+	                }
+	                else {
+                            // nothing on success unless we wanna get crazy with logging replies
+	                }
+                    });
+                }
+            }
+
         });
-      }
-    }
 
-  });
+    };
 
-};
+    this.tweeter();
 
-_.when(
-  sequencer.initDB()
-).then(function(status) {
-  if (status.toLowerCase().indexOf('error') > -1) {
-    console.log(status);
-    process.exit();
-  }
-
-  // only start up if no init errors
-
-  // Tweets ever n minutes
-  // set config.seconds to 60 for a complete minute
-  setInterval(function () {
-    try {
-      tweeter();
-    }
-    catch (e) {
-      console.log(e);
-    }
-  }, 1000 * config.minutes * config.seconds);
-
-  // Tweets once on initialization.
-  tweeter();
-});
+}();
