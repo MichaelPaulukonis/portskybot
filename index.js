@@ -1,53 +1,53 @@
+'use strict';
 
-var tweetbot = function() {
+(function() {
 
-    // ### Libraries
-    var config = require('./config.js'),
-        Twit = require('twit'),
-        T = new Twit(config),
-        sequencer = new (require('./sequencer.js'))(config),
-        _ = require('underscore');
+  // ### Libraries
+  var config = require('./config.js'),
+      Twit = require('twit'),
+      T = new Twit(config),
+      sequencer = new (require('./portsky.js'))(config),
+      _ = require('underscore');
 
-    _.mixin(require('underscore.deferred'));
+  _.mixin(require('underscore.deferred'));
 
 
-    // ### Utility Functions
-    this.logger = function(msg) {
-        if (config.log) console.log(msg);
-    };
+  // ### Utility Functions
+  var logger = function(msg) { //eslint-disable-line no-unused-vars
+    if (config.log) console.log(msg);
+  };
 
-    this.tweeter = function() {
+  var tweeter = function() {
 
-        var that = this;
+    var that = this;
 
-        _.when(
-            sequencer.next()
-        ) .then(function() {
+    _.when(
+      sequencer.next()
+    ) .then(function() {
 
-            var sentence =_.flatten(arguments);
-            if (sentence[0]) sentence = sentence[0];
+      var sentence =_.flatten(arguments);
+      if (sentence[0]) sentence = sentence[0];
 
-            that.logger(sentence);
+      logger(sentence);
 
-            if (sentence.length === 0 || sentence.length > 140) {
-                that.tweeter();
-            } else {
-                if (config.tweet_on) {
-                    T.post('statuses/update', { status: sentence }, function(err, reply) {
-	                if (err) {
-	                    console.log('error:', err);
-	                }
-	                else {
-                            // nothing on success unless we wanna get crazy with logging replies
-	                }
-                    });
-                }
+      if (sentence.length === 0 || sentence.length > 140) {
+        tweeter();
+      } else {
+        if (config.tweet_on) {
+          T.post('statuses/update', { status: sentence }, function(err, reply) {
+            if (err) {
+              console.log('error:', err);
             }
+            else {
+              // nothing on success unless we wanna get crazy with logging replies
+              logger(reply);
+            }
+          });
+        }
+      }
 
-        });
+    });
 
-    };
+  }();
 
-    this.tweeter();
-
-}();
+}());
