@@ -13,10 +13,20 @@ var sequencer = function(config) {
   var logger = function() { //eslint-disable-line no-unused-vars
     if(!config.log) return;
 
-    for (var i = 0; i < arguments.length; i++) {
-      console.log(arguments[i]);
-    }
+    var args = Array.prototype.slice.call(arguments);
+    console.log(args.join(' '));
+
   };
+
+  this.fixup = function(text) {
+    text = text.replace(/ The\b/g, ' the')
+      .replace(/ This\b/g, ' this')
+      .replace(/\bi\b/g, 'I')
+      .replace(/ He\b/g, 'he ');
+    return text;
+  };
+
+  var that = this;
 
   this.next = function() {
     var dfd = _.Deferred(),
@@ -30,6 +40,7 @@ var sequencer = function(config) {
 
     // cleaner removes line-breaks.
     text = cleaner(text);
+    // text = that.fixup(text);
 
     logger('portsky: ', text);
 

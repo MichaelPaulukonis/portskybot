@@ -36,11 +36,11 @@
         if (config.tweet_on) {
           T.post('statuses/update', { status: sentence }, function(err, reply) {
             if (err) {
-              console.log('error:', err);
+              console.log('error:', err, reply);
             }
             else {
               // nothing on success unless we wanna get crazy with logging replies
-              logger(reply);
+              // logger(reply);
             }
           });
         }
