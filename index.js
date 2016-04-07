@@ -19,8 +19,6 @@
 
   var tweeter = function() {
 
-    var that = this;
-
     _.when(
       sequencer.next()
     ) .then(function() {

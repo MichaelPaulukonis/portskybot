@@ -18,16 +18,6 @@ var sequencer = function(config) {
 
   };
 
-  this.fixup = function(text) {
-    text = text.replace(/ The\b/g, ' the')
-      .replace(/ This\b/g, ' this')
-      .replace(/\bi\b/g, 'I')
-      .replace(/ He\b/g, 'he ');
-    return text;
-  };
-
-  var that = this;
-
   this.next = function() {
     var dfd = _.Deferred(),
         Tagspewer = require('tagspewer').tagspewer,
@@ -40,7 +30,6 @@ var sequencer = function(config) {
 
     // cleaner removes line-breaks.
     text = cleaner(text);
-    // text = that.fixup(text);
 
     logger('portsky: ', text);
 
